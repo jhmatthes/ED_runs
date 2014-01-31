@@ -2,10 +2,6 @@
 #Jaclyn Hatala Matthes, 1/30/14
 #jaclyn.hatala.matthes@gmail.com
 
-#Close all devices and delete all variables. 
-graphics.off()
-rm(list=ls())
-
 #Load libraries
 ok = require(chron,lib.loc="/usr4/spclpgm/jmatthes/"); if (! ok) stop("Package chron is not available...")
 ok = require(ncdf,lib.loc="/usr4/spclpgm/jmatthes/") ; if (! ok) stop("Package ncdf is not available...")
@@ -16,6 +12,30 @@ ok = require(colorspace,lib.loc="/usr4/spclpgm/jmatthes/") ; if (! ok) stop("Pac
 
 #Set sites
 sites <- c("PBL","PHA","PMB","PDL","PHO","PUN")
+
+#Some plotting stuff
+plot.path  <- paste("/projectnb/cheas/paleon/ED_runs/phase1a_runs/",sites[s],"/plots/",sep="")
+plot.place <- paste(sites[s],": Spin-up",sep="")
+plot.ptsz   = 14     # Default font size
+plot.width  = 9.7    # Window width
+plot.height = 6.0    # Window.heights
+
+#Names and colors for all PFTs, so it works for tropical and temperate.
+pft.names = c("C4 grass"          ,"Early tropical"    ,"Mid tropical"      
+              ,"Late tropical"     ,"Temperate C3 Grass","North Pine"        
+              ,"South Pine"        ,"Late conifer"      ,"Early hardwood"    
+              ,"Mid hardwood"      ,"Late hardwood"     ,"C3 crop"           
+              ,"C3 pasture"        ,"C4 crop"           ,"C4 pasture"        
+              ,"C3 grass"          ,"Araucaria"         ,"Total"             )
+pft.cols  = c("gold"              ,"chartreuse"        ,"chartreuse4"       
+              ,"#004E00"           ,"mediumpurple1"     ,"deepskyblue"       
+              ,"mediumturquoise"   ,"royalblue4"        , "darkorange"       
+              ,"orangered"         ,"firebrick4"         , "purple4"          
+              ,"darkorchid1"       ,"darkgoldenrod"     ,   "khaki"          
+              ,"lightgoldenrod3"   ,"steelblue3"        ,   "grey22"         )
+n.pft     = length(pft.names) - 1
+
+pft <- c(5,6,8,9,10,11)
 
 for(s in 1:length(sites)){
   #Set directories
@@ -28,36 +48,11 @@ for(s in 1:length(sites)){
   yeara <- as.numeric(strsplit(ann.files,"-")[[1]][3]) #first year
   yearz <- as.numeric(strsplit(ann.files,"-")[[length(ann.files)]][3]) #last year
   
-  #Some plotting stuff
-  plot.path  <- paste("/projectnb/cheas/paleon/ED_runs/phase1a_runs/",sites[s],"/plots/",sep="")
-  plot.place <- paste(sites[s],": Spin-up",sep="")
-  plot.ptsz   = 14     # Default font size
-  plot.width  = 9.7    # Window width
-  plot.height = 6.0    # Window.heights
-  
-  #Names and colors for all PFTs, so it works for tropical and temperate.
-  pft.names = c("C4 grass"          ,"Early tropical"    ,"Mid tropical"      
-                ,"Late tropical"     ,"Temperate C3 Grass","North Pine"        
-                ,"South Pine"        ,"Late conifer"      ,"Early hardwood"    
-                ,"Mid hardwood"      ,"Late hardwood"     ,"C3 crop"           
-                ,"C3 pasture"        ,"C4 crop"           ,"C4 pasture"        
-                ,"C3 grass"          ,"Araucaria"         ,"Total"             )s
-  pft.cols  = c("gold"              ,"chartreuse"        ,"chartreuse4"       
-                ,"#004E00"           ,"mediumpurple1"     ,"deepskyblue"       
-                ,"mediumturquoise"   ,"royalblue4"        , "darkorange"       
-                ,"orangered"         ,"firebrick4"         , "purple4"          
-                ,"darkorchid1"       ,"darkgoldenrod"     ,   "khaki"          
-                ,"lightgoldenrod3"   ,"steelblue3"        ,   "grey22"         )
-  n.pft     = length(pft.names) - 1
-  
-  pft <- c(5,6,8,9,10,11)
-  
   agb.pft <- lai.pft <- bsa.pft <- matrix(nrow=(yearz-yeara+1),ncol=length(pft))
   balive <- broot <- bleaf <- bsapa <- bsapb <- sfast <- sslow <- sstruc <- vector(length=(yearz-yeara+1))
   #loop over years and aggregate annual data
   for (y in yeara:yearz){
     cat(" - Reading file :",ann.files[y-yeara+1],"...","\n")
-    
     now <- open.ncdf(paste(dat.dir,ann.files[y-yeara+1],sep=""))
     
     #Grab global & patch level variables.
@@ -137,9 +132,9 @@ for(s in 1:length(sites)){
     points(year.date,cpools2[p,],col=pft.cols[p],pch=16)
   }
   names <- c("sfast","sslow","sstruc")
-  legend(year.date[2],max(cpools2)-mean(cpools2),names,col=pft.cols[1:nrow(cpools)],pch=16)
+  legend(year.date[2],max(cpools2)-mean(cpools2),names,col=pft.cols[1:nrow(cpools2)],pch=16)
   
-  dev.off()
+#  dev.off()
   
   rm(dat.dir,yeara,yearz,files,ann.files,match.files)
 }
