@@ -51,6 +51,7 @@ for(s in 1:length(sites)){
   agb.pft <- lai.pft <- bsa.pft <- matrix(nrow=(yearz-yeara+1),ncol=length(pft))
   balive <- broot <- bleaf <- bsapa <- bsapb <- sfast <- sslow <- sstruc <- vector(length=(yearz-yeara+1))
   #loop over years and aggregate annual data
+  
   for (y in yeara:yearz){
     cat(" - Reading file :",ann.files[y-yeara+1],"...","\n")
     now <- open.ncdf(paste(dat.dir,ann.files[y-yeara+1],sep=""))
