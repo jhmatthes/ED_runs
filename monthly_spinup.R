@@ -40,7 +40,7 @@ suffix <- "g01.h5"
 
 for(s in 1:length(sites)){
   #Set directories
-  dat.dir    <- paste("/projectnb/cheas/paleon/ED_runs/phase1a_runs/",sites[s],"/analy/",sep="")
+  dat.dir    <- paste("/projectnb/cheas/paleon/ED_runs/phase1a_runs/",sites[s],"/analy2/",sep="")
   match.files <- grep("-E-",list.files(dat.dir))
   files <- list.files(dat.dir)
   mon.files  <- files[match.files] #monthly files only
@@ -52,7 +52,7 @@ for(s in 1:length(sites)){
   monthz <- as.numeric(strsplit(mon.files,"-")[[length(mon.files)]][4]) #first month
   
   #Set up storage
-  atm_pres <- atm_vpd <- atm_pre <- atm_tmp <- atm_rnt <- atm_trsp <- atm_swat <- vector()
+  atm_pres <- atm_vpd <- atm_pre <- atm_tmp <- atm_rnt <- atm_trsp <- atm_swat <- npp_site <- vector()
   cbal.pft <- cbalbr.pft <- PAR.pft <- lai.pft <- matrix(nrow=((yearz-yeara-1)*12+(12-montha+1)),
                                                          ncol=length(pft))
   
@@ -104,6 +104,7 @@ for(s in 1:length(sites)){
       atm_rnt[mon.ind]       <- get.var.ncdf(now,'MMEAN_RNET')
       atm_trsp[mon.ind]      <- get.var.ncdf(now,'MMEAN_TRANSP')
       atm_swat[mon.ind]      <- get.var.ncdf(now,'MMEAN_SOIL_WATER')
+      npp_site[mon.ind]      <- get.var.ncdf(now,"MMEAN_NPPDAILY")
       
       #Grab cohort level variables.21600/
       ipft      <- get.var.ncdf(now,'PFT')
@@ -175,6 +176,11 @@ for(s in 1:length(sites)){
   }
   legend(dates[2],max(lai.pft)-mean(lai.pft),pft.names[sort(unique(ipft))],col=pft.cols[5:10],pch=16)
 
+  #Monthly NPP
+  plot(dates,npp_site[1:length(npp_site)-1],col=pft.cols[5],pch=16,ylim=range(lai.pft),
+       xlab="spin-up date",ylab="Mean daily NPP [kg m-2]",
+       main=paste(sites[s],": Spin-up",sep=""))
+  
   #Monthly C balance by PFT
   plot(dates,cbal.pft[,1],col=pft.cols[5],pch=16,ylim=c(-5,5),
        xlab="spin-up date",ylab="Monthly C Balance",
@@ -193,9 +199,7 @@ for(s in 1:length(sites)){
   }
   legend(dates[2],0.8,pft.names[sort(unique(ipft))],col=pft.cols[5:10],pch=16)
   
-  
 #  dev.off()
-  
   rm(dat.dir,yeara,yearz,files,ann.files,match.files)
 }
 
