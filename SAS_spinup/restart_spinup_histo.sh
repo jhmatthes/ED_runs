@@ -17,7 +17,7 @@ fi
 
 while true
 do
-    sleep 600 #only run every 5 minutes
+    sleep 300 #only run every 5 minutes
 
     for SITE in ${sites[@]}
     do
