@@ -39,16 +39,16 @@ do
 		pushd ${path} 
 
 		#edit ED2IN dates for restart
-		sed -i "s/IYEARA   = .*/IYEARA   = ${lastyear}   ! Year/" ED2IN 
-		sed -i "s/IDATEA   = .*/IDATEA   = ${lastday}     ! Day/" ED2IN 
-		sed -i "s/IMONTHA  = .*/IMONTHA  = ${lastmonth}     ! Month/" ED2IN 
-		sed -i "s/IYEARH   = .*/IYEARH   = ${lastyear}   ! Year/" ED2IN 
-		sed -i "s/IDATEH   = .*/IDATEH   = ${lastday}     ! Day/" ED2IN 
-		sed -i "s/IMONTHH  = .*/IMONTHH  = ${lastmonth}     ! Month/" ED2IN 
+		sed -i "s/IYEARA   =.*/IYEARA   = ${lastyear}   ! Year/" ED2IN 
+		sed -i "s/IDATEA   =.*/IDATEA   = ${lastday}     ! Day/" ED2IN 
+		sed -i "s/IMONTHA  =.*/IMONTHA  = ${lastmonth}     ! Month/" ED2IN 
+		sed -i "s/IYEARH   =.*/IYEARH   = ${lastyear}   ! Year/" ED2IN 
+		sed -i "s/IDATEH   =.*/IDATEH   = ${lastday}     ! Day/" ED2IN 
+		sed -i "s/IMONTHH  =.*/IMONTHH  = ${lastmonth}     ! Month/" ED2IN 
 
 		#edit ED2IN params for history restart
-		sed -i 's/IED_INIT_MODE   = .*/IED_INIT_MODE   = 5/' ED2IN
-		sed -i "s/RUNTYPE  = .*/RUNTYPE  = 'HISTORY'/" ED2IN
+		sed -i 's/IED_INIT_MODE   =.*/IED_INIT_MODE   = 5/' ED2IN
+		sed -i "s/RUNTYPE  =.*/RUNTYPE  = 'HISTORY'/" ED2IN
 
 	        qsub paleon_ed2_geo.sh
 		popd
