@@ -1,15 +1,18 @@
 #!bin/bash
-#This file finds the most recent history file and then 
+#This file queries the queue to make sure the runs are still going. If not, it edits the ED2IN file
+#based on the last histo file printed and restarts a HISTORY run.
+#Jaclyn Hatala Matthes, 2/6/14
+#jaclyn.hatala.matthes@gmail.com
 
 USER=`whoami`
 sites=(PBL PDL PHA PHO PMB PUN)
 finalyear=3750
-runtype="'INITIAL'"
 outdir=/projectnb/cheas/paleon/ED_runs/phase1a_spinup/
 
 if [ ! -d ${outdir} ]
 then
     echo "ERROR: you must run make_spinup_subdirs.sh before this!"
+    echo "ERROR: you must run submit_spinup_ensemble.sh before this to start some runs!"
 fi
 
 while true
@@ -29,14 +32,11 @@ do
 	    lastday=`ls -l -rt ${path}/histo| tail -1 | rev | cut -c15-16 | rev`
 	    lastmonth=`ls -l -rt ${path}/histo| tail -1 | rev | cut -c18-19 | rev`
 	    lastyear=`ls -l -rt ${path}/histo| tail -1 | rev | cut -c21-24 | rev`
-	    echo $lastyear
-	    echo $runstat
 
 	    #if run has stopped and last year in histo directory is less than the final run year
 	    if [[ "${runstat}" -eq 0 && "${lastyear}" -lt "${finalyear}" ]]
 	    then
 		pushd ${path} 
-		echo "got here!"
 
 		#edit ED2IN dates for restart
 		sed -i "s/IYEARA   = .*/IYEARA   = ${lastyear}   ! Year/" ED2IN 
@@ -50,7 +50,7 @@ do
 		sed -i 's/IED_INIT_MODE   = .*/IED_INIT_MODE   = 5/' ED2IN
 		sed -i "s/RUNTYPE  = .*/RUNTYPE  = 'HISTORY'/" ED2IN
 
-#	        qsub paleon_ed2_geo.sh
+	        qsub paleon_ed2_geo.sh
 		popd
 	    fi
 	done

@@ -43,9 +43,8 @@ do
 	#edit ED2IN file with correct params & path
 	pushd ${outdir}$SITE/spin${rep}/
 	ln -s /projectnb/cheas/paleon/ED_runs/T_ED2/ED/build/ed_2.1-opt .
-	newbase=${outdir}$SITE/spin${rep}/
-	oldbase=${cpdir}$SITE/
-	oldbase2=${cpdir}$SITE/
+	newbase=${outdir}$SITE/spin${rep}
+	oldbase=${cpdir}$SITE
 	newpath1="'${outdir}${SITE}/spin${rep}/analy/${SITE}${rep}spin'"
         newpath2="'${outdir}${SITE}/spin${rep}/histo/${SITE}${rep}spin'"
         oldpath1="'${cpdir}$SITE/analy/${SITE}spin'"
@@ -56,8 +55,7 @@ do
 	sed -i "s,$oldpath1,$newpath1,g" ED2IN #change output paths
 	sed -i "s,$oldpath2,$newpath2,g" ED2IN #change output paths
 	sed -i 's/IED_INIT_MODE   = 5/IED_INIT_MODE   = 0/' ED2IN #change init mode from history to bare ground
-	sed -i "s,$oldbase,$newbase,g" paleon_ed2_geo.sh  #change path in submit script
-	sed -i "s,$oldbase2,$newbase,g" paleon_ed2_geo.sh #change path in submit script
+	sed -i "s,$oldbase.*,$newbase,g" paleon_ed2_geo.sh #change path in submit script
 	sed -i "s,${SITE}spin,${SITE}spin${rep},g" paleon_ed2_geo.sh #change job name
 	popd
     done
