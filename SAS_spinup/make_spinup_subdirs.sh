@@ -36,13 +36,13 @@ do
 	cp ${cpdir}$SITE/ED2IN ${outdir}/$SITE/spin$rep/
 	cp ${cpdir}$SITE/paleon_ed2_geo.sh ${outdir}/$SITE/spin$rep/
 	cp ${cpdir}$SITE/PL_MET_HEADER ${outdir}/$SITE/spin$rep/
-	cp ${cpdir}$SITE/config.xml ${outdir}/$SITE/spin$rep/
+	cp ${cpdir}$SITE/PalEON_Phase1a.xml ${outdir}/$SITE/spin$rep/
 	mkdir ${outdir}$SITE/spin$rep/histo
 	mkdir ${outdir}$SITE/spin$rep/analy
 	
 	#edit ED2IN file with correct params & path
 	pushd ${outdir}$SITE/spin${rep}/
-	ln -s /projectnb/cheas/paleon/ED_runs/T_ED2/ED/build/ed_2.1-opt .
+	ln -s /usr4/spclpgm/jmatthes/ED.r82/ED/build/ed_2.1-opt .
 	newbase=${outdir}$SITE/spin${rep}
 	oldbase=${cpdir}$SITE
 	newpath1="'${outdir}${SITE}/spin${rep}/analy/${SITE}${rep}spin'"
