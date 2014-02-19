@@ -9,108 +9,152 @@ ok = require(colorspace,lib.loc="/usr4/spclpgm/jmatthes/") ; if (! ok) stop("Pac
 
 #Setup analysis file structure
 base  <- "/projectnb/cheas/paleon/ED_runs/phase1a_spinup/"
+out   <- "/projectnb/cheas/paleon/ED_runs/SAS_spinup/phase1a_spinup/"
 sites <- c("PBL","PHA","PMB","PDL","PHO","PUN")
-niter <- length(list.dirs(paste(base,sites[1],"/",sep=""),recursive=FALSE)) #iterations/site
-yeara <- 1850 #actually is 850, but had to trick ED
-yearz <- 1855 
+niter <- length(list.dirs(paste(base,sites[1],"/",sep=""),recursive=FALSE)) #iterations/site 
 pft   <- c(5,6,8,9,10,11) #set of PFTs used in analysis
+dpm <- c(31,28,31,30,31,30,31,31,30,31,30,31)
 sufx  <- "g01.h5"
 
-#Pretty PFT plotting params
-pft.names = c("C4 grass"          ,"Early tropical"    ,"Mid tropical"      
-              ,"Late tropical"     ,"Temperate C3 Grass","North Pine"        
-              ,"South Pine"        ,"Late conifer"      ,"Early hardwood"    
-              ,"Mid hardwood"      ,"Late hardwood"     ,"C3 crop"           
-              ,"C3 pasture"        ,"C4 crop"           ,"C4 pasture"        
-              ,"C3 grass"          ,"Araucaria"         ,"Total"             )
-pft.cols  = c("gold"              ,"chartreuse"        ,"chartreuse4"       
-              ,"#004E00"           ,"mediumpurple1"     ,"deepskyblue"       
-              ,"mediumturquoise"   ,"royalblue4"        , "darkorange"       
-              ,"orangered"         ,"firebrick4"         , "purple4"          
-              ,"darkorchid1"       ,"darkgoldenrod"     ,   "khaki"          
-              ,"lightgoldenrod3"   ,"steelblue3"        ,   "grey22"         )
-n.pft     = length(pft.names) - 1
+#First loop over analy files (faster than histo) to aggregate initial 
+#.css and .pss files for each site
+for(s in sites){
+  
+  #Set directories
+  dat.dir    <- paste(base,s,"/spin01/analy/",sep="")
+  match.files <- grep("-Y-",list.files(dat.dir))
+  files <- list.files(dat.dir)
+  ann.files  <- files[match.files] #yearly files only
+  
+  #Get time window
+  yeara <- as.numeric(strsplit(ann.files,"-")[[1]][3]) #first year
+  yearz <- as.numeric(strsplit(ann.files,"-")[[length(ann.files)]][3]) #last year
 
-#Set directories
-s <- 1
-  #Set up storage
-  atm_pres <- atm_vpd <- atm_pre <- atm_tmp <- atm_rnt <- atm_trsp <- atm_swat <- npp_site <- vector()
-  cbal.pft <- cbalbr.pft <- PAR.pft <- lai.pft <- matrix(nrow=((yearz-yeara-1)*12+(12-montha+1)),
-                                                         ncol=length(pft))
-  fnpp <- matrix(ncol=8,nrow=(yearz-yeara+1))
-  #monthly storage
-  npp <- leaf.drop <- npp.leaf <- npp.croot <- npp.froot <- npp.sapwood <- npp.wood <- npp.seed <- matrix(ncol=12,nrow=(yearz-yeara+1))
+  #storage
+  pss.big <- matrix(nrow=(yearz-yeara+1),ncol=14)
+  colnames(pss.big) <- c("site","year","patch","dst","age","area","water","fsc","stsc","stsl",
+                         "ssc","psc","msn","fsn")
   
-  gb.pft <- lai.pft <- bsa.pft <- matrix(nrow=(yearz-yeara+1),ncol=length(pft))
-  balive <- broot <- bleaf <- bsapa <- bsapb <- sfast <- sslow <- sstruc <- vector(length=(yearz-yeara+1))
-  #loop over years and aggregate annual data
-  
-fsc_in_y <- ssc_in_y <- ssl_in_y <- vector()
-
-for (y in yeara:yearz){
-  
-  #Make the file name. 
-  year.now  <-sprintf("%4.4i",y)
-  month.now <- sprintf("%2.2i",6)
-  day.now   <- sprintf("%2.2i",1)
-  hour.now  <- sprintf("%6.6i",0)
-  
-  for(n in 1:niter){
-    iter        <- sprintf("%02i",n)
-    dat.dir     <- paste(base,sites[s],"/spin",iter,"/histo/",sep="")
-    file.now    <- paste(sites[s],iter,"spin","-S-",year.now,"-",month.now,"-",day.now,"-"
-                         ,hour.now,"-",sufx,sep="")
+  for (y in yeara:yearz){
+    cat(" - Reading file :",ann.files[y-yeara+1],"...","\n")
+    now <- open.ncdf(paste(dat.dir,ann.files[y-yeara+1],sep=""))
     
-    cat(" - Reading file :",file.now,"...","\n")
-    now <- open.ncdf(paste(dat.dir,file.now,sep=""))
+    #Grab variable to see how many cohorts there are
+    ipft      <- get.var.ncdf(now,'PFT')
     
-    #get soil C params for SAS
-    fsc_in[n] <- get.var.ncdf(now,"FSC_IN")
-    ssc_in[n] <- get.var.ncdf(now,"SSC_IN")
-    ssl_in[n] <- get.var.ncdf(now,"SSL_IN")
+    #organize into .css variables
+    css.tmp <- matrix(nrow=length(ipft),ncol=10)
+    css.tmp[,1] <- rep(y,length(ipft))
+    css.tmp[,2] <- rep(y-yeara+1,length(ipft))
+    css.tmp[,3] <- 1:length(ipft)
+    css.tmp[,4] <- get.var.ncdf(now,'DBH')
+    css.tmp[,5] <- get.var.ncdf(now,'HITE')
+    css.tmp[,6] <- ipft
+    css.tmp[,7] <- get.var.ncdf(now,'NPLANT')
+    css.tmp[,8] <- get.var.ncdf(now,'BDEAD')
+    css.tmp[,9] <- get.var.ncdf(now,'BALIVE')
+    css.tmp[,10] <- rep(-999,length(ipft))
+    colnames(css.tmp) <- c("year","patch","cohort","dbh","ht","pft","n","bdead","balive","Avgrg")
     
-#       #Grab cohort level variables.
-#       ipft      <- get.var.ncdf(now,'PFT')
-#       dbh       <- get.var.ncdf(now,'DBH')
-#       nplant    <- get.var.ncdf(now,'NPLANT')
-#       lai       <- get.var.ncdf(now,'LAI_CO')
-#       hgt       <- get.var.ncdf(now,'HITE')
-#       agb       <- get.var.ncdf(now,'AGB_CO')
-#       bsa       <- get.var.ncdf(now,'BA_CO')
-#       
-#       ncohorts  <- get.var.ncdf(now,'NCOHORTS_GLOBAL')
-#       ncohort.per.patch    <- get.var.ncdf(now,'PACO_N')
-#       
-#       #if any PFTs go extinct, make placeholders
-#       if(length(unique(ipft))<length(pft)){
-#         tmp  <- (length(pft)-length(unique(ipft)))
-#         ipft <- c(ipft,pft[!(pft %in% ipft)])
-#         agb  <- c(agb,rep(0,tmp))
-#         lai  <- c(lai,rep(0,tmp))
-#         bsa  <- c(ba,rep(0,tmp))
-#       }
-#       
-#       agb.pft[(y-yeara+1),] <- tapply(agb,ipft,sum)
-#       lai.pft[(y-yeara+1),] <- tapply(lai,ipft,sum)
-#       bsa.pft[(y-yeara+1),] <- tapply(bsa,ipft,sum)
-#     
-#       #Average annual carbon pools [kgC/m2]
-#       balive[y-yeara+1]    <- sum(get.var.ncdf(now,'BALIVE')) #avg living biomass
-#       bleaf[y-yeara+1]     <- sum(get.var.ncdf(now,'BLEAF')) 
-#       broot[y-yeara+1]     <- sum(get.var.ncdf(now,'BROOT')) 
-#       bsapa[y-yeara+1]     <- sum(get.var.ncdf(now,'BSAPWOODA')) 
-#       bsapb[y-yeara+1]     <- sum(get.var.ncdf(now,'BSAPWOODB')) 
-#       sfast[y-yeara+1]     <- get.var.ncdf(now,'FAST_SOIL_C') 
-#       sslow[y-yeara+1]     <- get.var.ncdf(now,'SLOW_SOIL_C') 
-#       sstruc[y-yeara+1]    <- get.var.ncdf(now,'STRUCTURAL_SOIL_C')
-#       
+    #save big .css matrix
+    if(y==yeara){
+      css.big <- css.tmp
+    } else{
+      css.big <- rbind(css.big,css.tmp)
+    }
+    
+    #if any PFTs go extinct, make placeholders for averaging
+    if(length(unique(ipft))<length(pft)){
+      tmp  <- (length(pft)-length(unique(ipft)))
+      ipft <- c(ipft,pft[!(pft %in% ipft)])
+      agb  <- c(agb,rep(0,tmp))
+      lai  <- c(lai,rep(0,tmp))
+      bsa  <- c(bsa,rep(0,tmp))
+    }
+    
+    #save .pss variables
+    pss.big[(y-yeara+1),1]  <- 1
+    pss.big[(y-yeara+1),2]  <- y
+    pss.big[(y-yeara+1),3]  <- y-yeara+1
+    pss.big[(y-yeara+1),4]  <- 1
+    pss.big[(y-yeara+1),5]  <- y-yeara+1
+    pss.big[(y-yeara+1),6]  <- get.var.ncdf(now,"AREA")
+    pss.big[(y-yeara+1),7]  <- 0.1
+    pss.big[(y-yeara+1),8]  <- get.var.ncdf(now,"FAST_SOIL_C")
+    pss.big[(y-yeara+1),9]  <- get.var.ncdf(now,"STRUCTURAL_SOIL_C")
+    pss.big[(y-yeara+1),10] <- get.var.ncdf(now,"STRUCTURAL_SOIL_L")
+    pss.big[(y-yeara+1),11] <- get.var.ncdf(now,"SLOW_SOIL_C")
+    pss.big[(y-yeara+1),12] <- 0
+    pss.big[(y-yeara+1),13] <- get.var.ncdf(now,"AVG_MSN")
+    pss.big[(y-yeara+1),14] <- get.var.ncdf(now,"AVG_FSN")
+    
     close.ncdf(now)
   }
-  fsc_in_y[y-yeara+1] <- mean(fsc_in,na.rm=TRUE)
-  ssc_in_y[y-yeara+1] <- mean(ssc_in,na.rm=TRUE)
-  ssl_in_y[y-yeara+1] <- mean(ssl_in,na.rm=TRUE)
+  write.table(css.big,file=paste(out,s,"spin.css",sep=""),row.names=FALSE,append=FALSE,
+              col.names=TRUE,quote=FALSE)
+  write.table(pss.big,file=paste(out,s,"spin.pss",sep=""),row.names=FALSE,append=FALSE,
+              col.names=TRUE,quote=FALSE)
 }
 
+
+#Second loop over histo files (much slower than analy) to aggregate soil inputs
+#for steady-state solution
+
+#storage
+fsc_in_y <- ssc_in_y <- ssl_in_y <- vector()
+fsc_in_m <- ssc_in_m <- ssl_in_m <- vector()
+
+for(s in sites){
+  dat.dir    <- paste(base,s,"/spin01/histo/",sep="")
+  match.files <- grep("-S-",list.files(dat.dir))
+  files <- list.files(dat.dir)
+  mon.files  <- files[match.files] #monthly files only
   
-
-
+  #Get time window
+  yeara <- as.numeric(strsplit(mon.files,"-")[[1]][3]) #first year
+  yearz <- as.numeric(strsplit(mon.files,"-")[[length(mon.files)]][3]) #last year
+  montha <- as.numeric(strsplit(mon.files,"-")[[1]][4]) #first month
+  monthz <- as.numeric(strsplit(mon.files,"-")[[length(mon.files)]][4]) #first month
+  
+  for (y in yeara:yearz){
+    
+    #calculate month start/end based on year 
+    if (y == yeara){
+      month.begin = montha
+    }else{
+      month.begin = 1
+    }
+    if (y == yearz){
+      month.end = monthz
+    }else{
+      month.end = 12
+    }
+    
+    for(m in month.begin:month.end){
+      #Make the file name. 
+      year.now  <-sprintf("%4.4i",y)
+      month.now <- sprintf("%2.2i",m)
+      day.now   <- sprintf("%2.2i",1)
+      hour.now  <- sprintf("%6.6i",0)
+      
+      dat.dir     <- paste(base,s,"/spin01/histo/",sep="")
+      file.now    <- paste(s,"01spin","-S-",year.now,"-",month.now,"-",day.now,"-"
+                           ,hour.now,"-",sufx,sep="")
+      
+      cat(" - Reading file :",file.now,"...","\n")
+      now <- open.ncdf(paste(dat.dir,file.now,sep=""))
+      
+      fsc_in_m[m-month.begin+1] <- get.var.ncdf(now,"FSC_IN")*dpm[m] #kg/(m2*day) --> kg/(m2*month)
+      ssc_in_m[m-month.begin+1] <- get.var.ncdf(now,"SSC_IN")*dpm[m]
+      ssl_in_m[m-month.begin+1] <- get.var.ncdf(now,"SSL_IN")*dpm[m]
+      fsn_in_m[m-month.begin+1] <- get.var.ncdf(now,"FSN_IN")*dpm[m]
+    }
+    fsc_in_y[y-yeara+1] <- sum(fsc_in_m,na.rm=TRUE)
+    ssc_in_y[y-yeara+1] <- sum(ssc_in_m,na.rm=TRUE)
+    ssl_in_y[y-yeara+1] <- sum(ssl_in_m,na.rm=TRUE)
+    fsn_in_y[y-yeara+1] <- sum(fsn_in_m,na.rm=TRUE)
+    
+    close.ncdf(now)
+  }
+  
+}
