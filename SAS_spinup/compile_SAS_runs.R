@@ -21,6 +21,7 @@ fsc_loss <- 1.0/11.0
 ssc_loss <- 1.0/100.2
 ssl_loss <- 1.0/5.4
 resp_temperature_increase <- 0.0757
+rel_soil_mois <- 0.8
 resp_opt_water            <- 0.8938
 resp_water_below_opt      <- 5.0786
 Lc                        <- 0.049787
@@ -29,8 +30,8 @@ c2n_structural            <- 150.0
 r_stsc                    <- 0.3
 soil_tempk <- c(278.5,279.3, 280.0, 277.3, 276.8, 277.2) #mean temp per site
 temperature_limitation = resp_temperature_increase * exp(308.56 * (1./56.02 - 1./(soil_tempk-227.15)))
-water_limitation <- exp((0.85 - resp_opt_water) * resp_water_below_opt)
-A_decomp <- temperature_limitation * water_limitation
+water_limitation <- exp((rel_soil_mois - resp_opt_water) * resp_water_below_opt)
+A_decomp <- temperature_limitation * water_limitation 
 
 #First loop over analy files (faster than histo) to aggregate initial 
 #.css and .pss files for each site
@@ -60,7 +61,7 @@ for(s in sites){
     
     #organize into .css variables
     css.tmp <- matrix(nrow=length(ipft),ncol=10)
-    css.tmp[,1] <- rep(y,length(ipft))
+    css.tmp[,1] <- rep(1850,length(ipft))
     css.tmp[,2] <- rep(y-yeara+1,length(ipft))
     css.tmp[,3] <- 1:length(ipft)
     css.tmp[,4] <- get.var.ncdf(now,'DBH')
@@ -79,18 +80,9 @@ for(s in sites){
       css.big <- rbind(css.big,css.tmp)
     }
     
-    #if any PFTs go extinct, make placeholders for averaging
-    if(length(unique(ipft))<length(pft)){
-      tmp  <- (length(pft)-length(unique(ipft)))
-      ipft <- c(ipft,pft[!(pft %in% ipft)])
-      agb  <- c(agb,rep(0,tmp))
-      lai  <- c(lai,rep(0,tmp))
-      bsa  <- c(bsa,rep(0,tmp))
-    }
-    
     #save .pss variables
     pss.big[(y-yeara+1),1]  <- 1
-    pss.big[(y-yeara+1),2]  <- y
+    pss.big[(y-yeara+1),2]  <- 1850
     pss.big[(y-yeara+1),3]  <- y-yeara+1
     pss.big[(y-yeara+1),4]  <- 1
     pss.big[(y-yeara+1),5]  <- y-yeara+1
