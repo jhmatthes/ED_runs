@@ -1,15 +1,19 @@
 These files contain pre- and post-processing code for running the ED2 model.
 
 The SAS_spinup/ directory contains code for running the semi-analytical solution for ED:
+
 1. make_spinup_subdirs.sh constructs a directory and set of sub-directories, copies, and edits
    an example ED2IN file in order to run a spin-up from bare-ground at multiple sites.
+
 2. restart_spinup_histo_lite.sh restarts ED2 runs that have stopped by finding the last
    year and month written to the histo/ directory, editing the ED2IN file appropriately,
    and then re-submitting the job to the cluster (paleon_ed2_geo.sh in each site-level folder 
    where ED2IN is).
+
 3. compile_SAS_runs.R contains the code to loop over the ED2 output analy and histo files 
    to compile the relevant pools and fluxes to construct the .css and .pss files for the semi-
    analytical solution. 
+
 4. phase1a_spinup/ directory contains the output (SAS .css and .pss files) from the 
    compile_SAS_runs.R code.
 
