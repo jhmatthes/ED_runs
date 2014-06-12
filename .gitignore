@@ -7,4 +7,5 @@ phase1a_spininitial/
 met_drivers/phase1a_met/
 phase1a_env_drivers.zip
 phase1a_env_drivers/
-.gitignore
+.*
+ED_process_output/
