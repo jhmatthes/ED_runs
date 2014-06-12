@@ -21,12 +21,12 @@ do
 
     for SITE in ${sites[@]}
     do
-	for n in {1..15}
-	do
+#	for n in {1..15}
+#	do
 	    #check if site rep is running
-	    rep=$(printf "%02d" ${n})
-	    path=${outdir}${SITE}/spin${rep}/
-	    runstat=$(qstat -u ${USER} | grep ${SITE}spin${rep} | wc -l)
+#	    rep=$(printf "%02d" ${n})
+	    path=${outdir}${SITE}/
+	    runstat=$(qstat -u ${USER} | grep ${SITE}spin | wc -l)
 
 	    #get dates of last histo file
 	    lastday=`ls -l -rt ${path}/histo| tail -1 | rev | cut -c15-16 | rev`
@@ -53,6 +53,6 @@ do
 	        qsub paleon_ed2_geo.sh
 		popd
 	    fi
-	done
+#	done
     done
 done

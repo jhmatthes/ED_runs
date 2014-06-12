@@ -1,9 +1,10 @@
-old_runs/
+PalEON_old_runs.tar.gz
 paleon_reg/
+old_runs/
 phase1a_runs/
-phase1a_spinup/
-met_drivers/
-T_ED2/ED/run/
-T_ED2/BRAMS/
-T_ED2/RAPP/
-T_ED2/Ramspost/
+phase1a_spinfinish/
+phase1a_spininitial/
+met_drivers/phase1a_met/
+phase1a_env_drivers.zip
+phase1a_env_drivers/
+.gitignore

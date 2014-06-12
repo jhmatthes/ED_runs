@@ -4,9 +4,9 @@
 #Jaclyn Hatala Matthes, 2/20/14
 #jaclyn.hatala.matthes@gmail.com
 
-sites=(PBL PDL PHA PHO PMB PUN)
-finalyear=3750
-outdir=/projectnb/cheas/paleon/ED_runs/phase1a_spinup/
+sites=(PBL PHA PHO PMB PUN PDL)
+finalyear=2000
+outdir=/projectnb/cheas/paleon/ED_runs/phase1a_spinfinish/
 
 if [ ! -d ${outdir} ]
 then
@@ -16,7 +16,7 @@ fi
 
 for SITE in ${sites[@]}
 do
-    path=${outdir}${SITE}/spin01/
+    path=${outdir}${SITE}/
 
 	    #get dates of last histo file
     lastday=`ls -l -rt ${path}/histo| tail -1 | rev | cut -c15-16 | rev`

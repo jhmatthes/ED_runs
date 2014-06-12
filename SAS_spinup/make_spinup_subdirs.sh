@@ -6,7 +6,7 @@
 sites=(PBL PDL PHA PHO PMB PUN)
 startyear=1850
 runtype="'INITIAL'"
-outdir=/projectnb/cheas/paleon/ED_runs/phase1a_spinup/
+outdir=/projectnb/cheas/paleon/ED_runs/p1a_spin_042214/
 cpdir=/projectnb/cheas/paleon/ED_runs/phase1a_runs/
 
 if [ ! -d ${outdir} ]
@@ -23,30 +23,30 @@ do
     fi
 
     #make directories for ensemble runs
-    for n in {1..15}
-    do
-	rep=$(printf "%02d" ${n})
-	echo $rep
-	if [ ! -d ${outdir}/$SITE/spin$rep/ ]
-	then
-            mkdir -p ${outdir}/$SITE/spin$rep/
-	fi
+#    for n in {1..15}
+#    do
+#	rep=$(printf "%02d" ${n})
+#	echo $rep
+#	if [ ! -d ${outdir}/$SITE/spin$rep/ ]
+#	then
+#            mkdir -p ${outdir}/$SITE/spin$rep/
+#	fi
 
 	#copy files and make directories for each run
-	cp ${cpdir}$SITE/ED2IN ${outdir}/$SITE/spin$rep/
-	cp ${cpdir}$SITE/paleon_ed2_geo.sh ${outdir}/$SITE/spin$rep/
-	cp ${cpdir}$SITE/PL_MET_HEADER ${outdir}/$SITE/spin$rep/
-	cp ${cpdir}$SITE/PalEON_Phase1a.xml ${outdir}/$SITE/spin$rep/
-	mkdir ${outdir}$SITE/spin$rep/histo
-	mkdir ${outdir}$SITE/spin$rep/analy
+	cp ${cpdir}$SITE/ED2IN ${outdir}/$SITE/
+	cp ${cpdir}$SITE/paleon_ed2_geo.sh ${outdir}/$SITE/
+	cp ${cpdir}$SITE/PL_MET_HEADER ${outdir}/$SITE/
+	cp ${cpdir}$SITE/PalEON_Phase1a.xml ${outdir}/$SITE/
+	mkdir ${outdir}$SITE/histo
+	mkdir ${outdir}$SITE/analy
 	
 	#edit ED2IN file with correct params & path
-	pushd ${outdir}$SITE/spin${rep}/
-	ln -s /usr4/spclpgm/jmatthes/ED.r82/ED/build/ed_2.1-opt .
-	newbase=${outdir}$SITE/spin${rep}
+	pushd ${outdir}$SITE/
+	ln -s /usr4/spclpgm/jmatthes/ED2_Erelax/ED/build/ed_2.1-opt .
+	newbase=${outdir}$SITE
 	oldbase=${cpdir}$SITE
-	newpath1="'${outdir}${SITE}/spin${rep}/analy/${SITE}${rep}spin'"
-        newpath2="'${outdir}${SITE}/spin${rep}/histo/${SITE}${rep}spin'"
+	newpath1="'${outdir}${SITE}/analy/${SITE}spin'"
+        newpath2="'${outdir}${SITE}/histo/${SITE}spin'"
         oldpath1="'${cpdir}$SITE/analy/${SITE}spin'"
 	oldpath2="'${cpdir}$SITE/histo/${SITE}spin'"
 
@@ -58,7 +58,7 @@ do
 	sed -i "s,$oldbase.*,$newbase,g" paleon_ed2_geo.sh #change path in submit script
 	sed -i "s,${SITE}spin,${SITE}spin${rep},g" paleon_ed2_geo.sh #change job name
 	popd
-    done
+#    done
 done
 
 
