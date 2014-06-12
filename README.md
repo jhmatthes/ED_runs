@@ -18,7 +18,8 @@ The SAS_spinup/ directory contains code for running the semi-analytical solution
    compile_SAS_runs.R code.
 
 
-The ED_process_output/ directory contains some random bits and pieces of plotting code.
+The ED_process_output/ directory contains some random bits and pieces of plotting code (it's own github
+repository).
 
 The met_drivers/ directory contains the PalEON met drivers for ED. Within this directory the script
 process_paleon_met.R will format the PalEON Phase 1a met drivers for input into ED2. 
